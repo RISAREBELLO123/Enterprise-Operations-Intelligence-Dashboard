@@ -3,6 +3,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime
+import sqlite3
+from queries import get_connection, get_all_data, get_forecast_data, get_high_risk_transactions, get_category_performance
 
 # Page config
 st.set_page_config(page_title="Ops Intelligence Dashboard", layout="wide", initial_sidebar_state="expanded")
@@ -88,17 +90,19 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 @st.cache_data
-def load_data():
-    df = pd.read_csv('data/final_operational_data.csv')
+def load_data_from_sql():
+    conn = get_connection()
+    df = get_all_data(conn)
     df['Date'] = pd.to_datetime(df['Date'])
-    forecast_df = pd.read_csv('data/revenue_forecast.csv')
+    forecast_df = get_forecast_data(conn)
     forecast_df['Date'] = pd.to_datetime(forecast_df['Date'])
+    conn.close()
     return df, forecast_df
 
 try:
-    df, forecast_df = load_data()
+    df, forecast_df = load_data_from_sql()
 except Exception as e:
-    st.error("Data files not found.")
+    st.error(f"Error connecting to database: {e}")
     st.stop()
 
 # Sidebar
@@ -152,7 +156,10 @@ with tab1:
         fig_reg.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig_reg, use_container_width=True)
     with col_y:
-        fig_cat = px.bar(filtered_df.groupby('Category')['Total_Profit'].sum().reset_index(), x='Category', y='Total_Profit', template="plotly_dark", color_discrete_sequence=['#58a6ff'])
+        conn = get_connection()
+        cat_perf = get_category_performance(conn)
+        conn.close()
+        fig_cat = px.bar(cat_perf, x='Category', y='total_profit', template="plotly_dark", color_discrete_sequence=['#58a6ff'])
         fig_cat.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig_cat, use_container_width=True)
 
@@ -167,8 +174,10 @@ with tab2:
         
     with col_b:
         st.markdown("**High Risk Records**")
-        risk_table = filtered_df[filtered_df['Risk_Score'] == 'High Risk'][['Order_ID', 'Region', 'Operational_Delay_Days']].head(12)
-        st.dataframe(risk_table, use_container_width=True)
+        conn = get_connection()
+        risk_table = get_high_risk_transactions(conn, limit=12)
+        conn.close()
+        st.dataframe(risk_table[['Order_ID', 'Region', 'Operational_Delay_Days']], use_container_width=True)
 
 with tab3:
     st.markdown("### Forecast Modeling")

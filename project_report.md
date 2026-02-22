@@ -6,9 +6,9 @@
 *Python | SQL | Streamlit | Predictive Analytics*
 
 * Analyzed **55,000+ operational records** using Python (Pandas/NumPy) to identify performance trends and regional inefficiencies.
-* Engineered a robust **automated data cleansing and validation pipeline**, ensuring 100% data integrity for business reporting.
+* Engineered a robust **automated data pipeline integrating SQLite for structured storage**, enabling SQL-based querying and validation across 55,000+ records.
 * Conducted Exploratory Data Analysis (EDA) to uncover seasonal revenue patterns and operational bottlenecks.
-* Developed an **interactive Streamlit executive dashboard** with real-time KPI monitoring and dynamic regional filtering.
+* Developed an **interactive Streamlit executive dashboard** with real-time KPI monitoring and dynamic SQL-backed regional filtering.
 * Implemented a **Predictive Analytics engine** using Holt-Winters for revenue forecasting and Isolation Forest for anomaly/risk detection.
 * Delivered actionable insights that simulate a data-driven approach to improving operational efficiency by identifying high-risk transactions.
 
